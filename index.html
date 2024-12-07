@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Calculadora de Porcentajes</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            background: linear-gradient(to right, #6a11cb, #2575fc); /* Degradado de fondo */
+            color: white; /* Color de texto */
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+        }
+        input, button {
+            margin: 5px;
+            padding: 10px;
+            border-radius: 5px;
+            border: none;
+            outline: none;
+        }
+        input {
+            width: calc(100% - 22px); /* Ajustar ancho del input */
+        }
+        button {
+            background-color: #ff4081; /* Color de botón */
+            color: white;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #ff1f5b; /* Color al pasar el mouse */
+        }
+        .mensaje {
+            font-weight: bold;
+            font-size: 1.2em;
+        }
+    </style>
+</head>
+<body>
+    <h1>Calculadora de Porcentajes</h1>
+    <label for="horas">Horas trabajadas por día :</label>
+    <input type="number" id="horas" required><br>
+
+    <label for="prendasPorHora">Prendas que pide por hora :</label>
+    <input type="number" id="prendasPorHora" required><br>
+
+    <label for="prendasProducidas">Prendas producidas al día :</label>
+    <input type="number" id="prendasProducidas" required><br>
+
+    <button onclick="calcular()">Calcular</button>
+
+    <h2>Resultados:</h2>
+    <p id="resultadoC"></p>
+    <p id="resultadoD"></p>
+    <p id="mensaje"></p>
+
+    <script>
+        function calcular() {
+            const n = parseFloat(document.getElementById('horas').value);
+            const a = parseFloat(document.getElementById('prendasPorHora').value);
+            const b = parseFloat(document.getElementById('prendasProducidas').value);
+
+            const c = n * a; // Multiplicar n × a
+            const d = b / c; // Dividir b ÷ c
+
+            document.getElementById('resultadoC').innerText = `Prendas requeridas : ${c}`;
+            document.getElementById('resultadoD').innerText = `Porcentaje de producción : ${(d * 100).toFixed(2)}%`;
+
+            const mensaje = document.getElementById('mensaje');
+            if (d < 0.5) {
+                mensaje.innerText = "¡Ánimo! 🌟 Puedes hacerlo, sigue esforzándote.";
+            } else if (d >= 0.5 && d < 1) {
+                mensaje.innerText = "¡Buen trabajo! 👍 Pero aún hay margen para mejorar.";
+            } else {
+                mensaje.innerText = "¡Felicidades! 🎉 Has superado las expectativas con un gran esfuerzo.";
+            }
+        }
+    </script>
+</body>
+</html>
