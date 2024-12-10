@@ -36,51 +36,90 @@
             font-weight: bold;
             font-size: 1.2em;
         }
+        .plantilla {
+            margin-top: 20px;
+            padding: 10px;
+            background-color: rgba(255, 255, 255, 0.2);
+            border-radius: 5px;
+        }
     </style>
 </head>
 <body>
     <h1>Calculadora de Porcentajes</h1>
-    <label for="horas">Horas trabajadas por día :</label>
-    <input type="number" id="horas" required><br>
-
-    <label for="prendasPorHora">Prendas que pide por hora :</label>
-    <input type="number" id="prendasPorHora" required><br>
-
-    <label for="prendasProducidas">Prendas producidas al día :</label>
-    <input type="number" id="prendasProducidas" required><br>
-
-    <button onclick="calcular()">Calcular</button>
-
-    <h2>Resultados:</h2>
-    <p id="resultadoC"></p>
-    <p id="resultadoD"></p>
-    <p id="mensaje"></p>
     
-    <h3>contact:</h3>
-    <a href="mailto:zcrypt83@duck.com?subject=Consulta&body=Hola%20crypt,%20me%20gustaría%20saber%20más%20sobre...">zcrypt83@duck.com</a>
-    <h4>visit my github</h4>
-    <a href="https://github.com/zcrypt83" target="_blank">
-        <img src="https://github.githubassets.com/images/modules/logos_page/GitHub-Mark.png" alt="GitHub Logo" width="30" height="40">
-    </a>
-    <h3>© 2024 crypt. All rights reserved.</h3>
+    <label for="horaIngreso">Hora de ingreso:</label>
+    <input type="time" id="horaIngreso" required><br>
 
+    <label for="horaSalida">Hora de salida:</label>
+    <input type="time" id="horaSalida" required><br>
+
+    <label for="operaciones">¿Cuántas operaciones haces (z)?:</label>
+    <input type="number" id="operaciones" required min="1"><br>
+    
+    <button onclick="mostrarPlantillas()">Siguiente</button>
+
+    <div id="plantillasContainer"></div>
+    <h2>Resultados:</h2>
+    <div id="resultado"></div>
+    <p id="mensaje" class="mensaje"></p>
 
     <script>
-        function calcular() {
-            const n = parseFloat(document.getElementById('horas').value);
-            const a = parseFloat(document.getElementById('prendasPorHora').value);
-            const b = parseFloat(document.getElementById('prendasProducidas').value);
+        function mostrarPlantillas() {
+            const z = parseInt(document.getElementById('operaciones').value);
+            const container = document.getElementById('plantillasContainer');
+            container.innerHTML = ''; // Limpiar el contenedor
 
-            const c = n * a; // Multiplicar n × a
-            const d = b / c; // Dividir b ÷ c
+            for (let i = 1; i <= z; i++) {
+                const plantilla = document.createElement('div');
+                plantilla.className = 'plantilla';
+                plantilla.innerHTML = `
+                    <h3>Plantilla ${i}</h3>
+                    <label for="prendasPorHora${i}">Prendas que pide por hora (a):</label>
+                    <input type="number" id="prendasPorHora${i}" required><br>
+                    <label for="prendasProducidas${i}">Prendas producidas al día (b):</label>
+                    <input type="number" id="prendasProducidas${i}" required><br>
+                `;
+                container.appendChild(plantilla);
+            }
 
-            document.getElementById('resultadoC').innerText = `Prendas requeridas : ${c}`;
-            document.getElementById('resultadoD').innerText = `Porcentaje de producción : ${(d * 100).toFixed(2)}%`;
+            const button = document.createElement('button');
+            button.innerText = 'Calcular Resultados';
+            button.onclick = calcularResultados;
+            container.appendChild(button);
+        }
+
+        function calcularResultados() {
+            const z = parseInt(document.getElementById('operaciones').value);
+            const horaIngreso = document.getElementById('horaIngreso').value;
+            const horaSalida = document.getElementById('horaSalida').value;
+
+            // Convertir horas a minutos
+            const [horaI, minutoI] = horaIngreso.split(':').map(Number);
+            const [horaS, minutoS] = horaSalida.split(':').map(Number);
+            const totalMinutos = (horaS * 60 + minutoS) - (horaI * 60 + minutoI) - 45; // Restar 45 minutos por almuerzo
+
+            const porcentajes = [];
+            let totalPorcentaje = 0;
+
+            for (let i = 1; i <= z; i++) {
+                const a = parseFloat(document.getElementById(`prendasPorHora${i}`).value);
+                const b = parseFloat(document.getElementById(`prendasProducidas${i}`).value);
+
+                const c = totalMinutos * (a / 60); // Prendas requeridas
+                const d = b / c; // Porcentaje de producción
+
+                porcentajes.push(d);
+                totalPorcentaje += d; // Sumar porcentajes
+                document.getElementById('resultado').innerHTML += `Operación ${i}: ${Math.floor(d * 100)}%<br>`; // Mostrar como entero
+            }
+
+            // Mostrar la suma de los porcentajes como entero
+            document.getElementById('resultado').innerHTML += `<strong>La suma de los porcentajes es: ${Math.floor(totalPorcentaje * 100)}%</strong><br>`;
 
             const mensaje = document.getElementById('mensaje');
-            if (d < 0.5) {
+            if (totalPorcentaje < 0.5) {
                 mensaje.innerText = "¡Ánimo! 🌟 Puedes hacerlo, sigue esforzándote.";
-            } else if (d >= 0.5 && d < 1) {
+            } else if (totalPorcentaje >= 0.5 && totalPorcentaje < 1) {
                 mensaje.innerText = "¡Buen trabajo! 👍 Pero aún hay margen para mejorar.";
             } else {
                 mensaje.innerText = "¡Felicidades! 🎉 Has superado las expectativas con un gran esfuerzo.";
