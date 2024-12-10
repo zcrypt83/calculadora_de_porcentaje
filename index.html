@@ -53,7 +53,7 @@
     <label for="horaSalida">Hora de salida:</label>
     <input type="time" id="horaSalida" required><br>
 
-    <label for="operaciones">¿Cuántas operaciones haces (z)?:</label>
+    <label for="operaciones">¿Cuántas operaciones haces ?:</label>
     <input type="number" id="operaciones" required min="1"><br>
     
     <button onclick="mostrarPlantillas()">Siguiente</button>
@@ -62,6 +62,13 @@
     <h2>Resultados:</h2>
     <div id="resultado"></div>
     <p id="mensaje" class="mensaje"></p>
+    <h3>contact:</h3>
+    <a href="mailto:zcrypt83@duck.com?subject=Consulta&body=Hola%20crypt,%20me%20gustaría%20saber%20más%20sobre...">zcrypt83@duck.com</a>
+    <h4>visit my github</h4>
+    <a href="https://github.com/zcrypt83" target="_blank">
+        <img src="https://github.githubassets.com/images/modules/logos_page/GitHub-Mark.png" alt="GitHub Logo" width="30" height="40">
+    </a>
+    <h3>© 2024 crypt. All rights reserved.</h3>
 
     <script>
         function mostrarPlantillas() {
@@ -73,10 +80,10 @@
                 const plantilla = document.createElement('div');
                 plantilla.className = 'plantilla';
                 plantilla.innerHTML = `
-                    <h3>Plantilla ${i}</h3>
-                    <label for="prendasPorHora${i}">Prendas que pide por hora (a):</label>
+                    <h3>Operacion ${i}</h3>
+                    <label for="prendasPorHora${i}">Prendas que pide por hora :</label>
                     <input type="number" id="prendasPorHora${i}" required><br>
-                    <label for="prendasProducidas${i}">Prendas producidas al día (b):</label>
+                    <label for="prendasProducidas${i}">Prendas producidas al día :</label>
                     <input type="number" id="prendasProducidas${i}" required><br>
                 `;
                 container.appendChild(plantilla);
