@@ -3,139 +3,410 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Calculadora de Porcentajes</title>
+    <title>Calculadora Laboral</title>
     <style>
+        :root {
+            --bg-color: #6a11cb;
+            --fg-color: #ffffff;
+            --button-bg: #ff4081;
+            --button-fg: white;
+            --tab-bg: #6a11cb;
+            --tab-selected: #2575fc;
+            --frame-bg: rgba(255, 255, 255, 0.2);
+            --entry-bg: rgba(255, 255, 255, 0.9);
+            --result-highlight: rgba(255, 255, 255, 0.3);
+        }
+
         body {
-            font-family: Arial, sans-serif;
-            margin: 20px;
-            background: linear-gradient(to right, #6a11cb, #2575fc); /* Degradado de fondo */
-            color: white; /* Color de texto */
+            font-family: 'Arial', sans-serif;
+            margin: 0;
+            padding: 20px;
+            background: var(--bg-color);
+            color: var(--fg-color);
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+
+        .tabs button {
+            background: var(--tab-bg);
+            color: var(--fg-color);
+            border: none;
+            padding: 10px 20px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+
+        .tabs button.active {
+            background: var(--tab-selected);
+        }
+
+        .tab-content {
+            display: none;
+            background: var(--frame-bg);
             padding: 20px;
             border-radius: 10px;
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+            margin-top: 10px;
         }
-        input, button {
-            margin: 5px;
-            padding: 10px;
-            border-radius: 5px;
-            border: none;
-            outline: none;
+
+        .tab-content.active {
+            display: block;
         }
-        input {
-            width: calc(100% - 22px); /* Ajustar ancho del input */
+
+        .input-group {
+            margin-bottom: 15px;
         }
+
+        input, select, button {
+            padding: 8px;
+            border-radius: 4px;
+            border: 1px solid #ccc;
+            background: var(--entry-bg);
+        }
+
         button {
-            background-color: #ff4081; /* Color de botón */
-            color: white;
+            background: var(--button-bg);
+            color: var(--button-fg);
             cursor: pointer;
         }
-        button:hover {
-            background-color: #ff1f5b; /* Color al pasar el mouse */
+
+        .time-selector {
+            display: flex;
+            gap: 5px;
+            align-items: center;
         }
-        .mensaje {
-            font-weight: bold;
-            font-size: 1.2em;
+
+        .sticker {
+            max-width: 200px;
+            margin: 20px auto;
         }
-        .plantilla {
-            margin-top: 20px;
-            padding: 10px;
-            background-color: rgba(255, 255, 255, 0.2);
+
+        .resultado {
+            padding: 15px;
+            margin: 10px 0;
+            border-radius: 5px;
+            background: var(--result-highlight);
+        }
+
+        .theme-selector {
+            position: fixed;
+            top: 10px;
+            right: 10px;
+        }
+
+        .operacion {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 15px;
+            margin: 10px 0;
             border-radius: 5px;
         }
     </style>
 </head>
 <body>
-    <h1>Calculadora de Porcentajes</h1>
-    
-    <label for="horaIngreso">Hora de ingreso:</label>
-    <input type="time" id="horaIngreso" required><br>
+    <div class="container">
+        <div class="theme-selector">
+            <select id="themeSelect" onchange="cambiarTema(this.value)">
+                <option value="gradiente">Gradiente</option>
+                <option value="claro">Claro</option>
+                <option value="oscuro">Oscuro</option>
+            </select>
+        </div>
 
-    <label for="horaSalida">Hora de salida:</label>
-    <input type="time" id="horaSalida" required><br>
+        <div class="tabs">
+            <button onclick="showTab('eficiencia')" class="active">Eficiencia</button>
+            <button onclick="showTab('cts')">CTS</button>
+            <button onclick="showTab('gratificacion')">Gratificación</button>
+        </div>
 
-    <label for="operaciones">¿Cuántas operaciones haces ?:</label>
-    <input type="number" id="operaciones" required min="1"><br>
-    
-    <button onclick="mostrarPlantillas()">Siguiente</button>
+        <!-- Pestaña Eficiencia -->
+        <div id="eficiencia" class="tab-content active">
+            <div class="input-group">
+                <label>Horario de trabajo:</label>
+                <div class="time-selector">
+                    <select id="horaIngreso"></select>:
+                    <select id="minutoIngreso"></select>
+                    <select id="periodoIngreso">
+                        <option>AM</option>
+                        <option>PM</option>
+                    </select>
+                    a
+                    <select id="horaSalida"></select>:
+                    <select id="minutoSalida"></select>
+                    <select id="periodoSalida">
+                        <option>AM</option>
+                        <option>PM</option>
+                    </select>
+                </div>
+            </div>
 
-    <div id="plantillasContainer"></div>
-    <h2>Resultados:</h2>
-    <div id="resultado"></div>
+            <div class="input-group">
+                <label>Número de operaciones:</label>
+                <input type="number" id="numOperaciones" min="1" value="1">
+                <button onclick="generarCamposOperaciones()">Generar</button>
+            </div>
 
-    <p id="mensaje" class="mensaje"></p>
-    <h3>Estamos trabajando para una nueva actualización muy pronto. ¡Esteis atentos! 😄           si tienes alguna duda, consultas o sugerencias dejame saberlo en el correo proporcionado aquí abajo 👇👇</h3>
+            <div id="operacionesContainer"></div>
+            <button onclick="calcularEficiencia()">Calcular Eficiencia</button>
+            <div id="resultadoEficiencia"></div>
+        </div>
 
-    <p id="mensaje" class="mensaje"></p>
-    <h3>contact:</h3>
-    <a href="mailto:zcrypt83@duck.com?subject=Consulta&body=Hola%20crypt,%20me%20gustaría%20saber%20más%20sobre...">zcrypt83@duck.com</a>
-    <h4>visit my github</h4>
-    <a href="https://github.com/zcrypt83" target="_blank">
-        <img src="https://github.githubassets.com/images/modules/logos_page/GitHub-Mark.png" alt="GitHub Logo" width="30" height="40">
-    </a>
-    <h3>© 2024 crypt. All rights reserved.</h3>
+        <!-- Pestaña CTS -->
+        <div id="cts" class="tab-content">
+            <div class="input-group">
+                <label>Meses trabajados:</label>
+                <input type="number" id="mesesCTS" min="1" max="12" value="6">
+            </div>
+            <div class="input-group">
+                <label>Sueldo básico:</label>
+                <input type="number" id="sueldoCTS" step="0.01">
+            </div>
+            <div class="input-group">
+                <label>Horas extras/mes:</label>
+                <input type="number" id="horasExtrasCTS" step="0.01" value="0">
+            </div>
+            <div class="input-group">
+                <label>Bonos/mes:</label>
+                <input type="number" id="bonosCTS" step="0.01" value="0">
+            </div>
+            <div class="input-group">
+                <label>Tardanzas (minutos):</label>
+                <input type="number" id="tardanzasCTS" value="0">
+            </div>
+            <div class="input-group">
+                <label>Faltas:</label>
+                <input type="number" id="faltasCTS" value="0">
+            </div>
+            <button onclick="calcularCTS()">Calcular CTS</button>
+            <div id="resultadoCTS"></div>
+        </div>
+
+        <!-- Pestaña Gratificación -->
+        <div id="gratificacion" class="tab-content">
+            <div class="input-group">
+                <label>Meses trabajados:</label>
+                <input type="number" id="mesesGrat" min="1" max="12" value="6">
+            </div>
+            <div class="input-group">
+                <label>Sueldo básico:</label>
+                <input type="number" id="sueldoGrat" step="0.01">
+            </div>
+            <div class="input-group">
+                <label>Horas extras/mes:</label>
+                <input type="number" id="horasExtrasGrat" step="0.01" value="0">
+            </div>
+            <div class="input-group">
+                <label>Bonos/mes:</label>
+                <input type="number" id="bonosGrat" step="0.01" value="0">
+            </div>
+            <div class="input-group">
+                <label>Faltas:</label>
+                <input type="number" id="faltasGrat" value="0">
+            </div>
+            <button onclick="calcularGratificacion()">Calcular Gratificación</button>
+            <div id="resultadoGrat"></div>
+        </div>
+    </div>
 
     <script>
-        function mostrarPlantillas() {
-            const z = parseInt(document.getElementById('operaciones').value);
-            const container = document.getElementById('plantillasContainer');
-            container.innerHTML = ''; // Limpiar el contenedor
+        // Configuración inicial
+        let operaciones = [];
+        const mensajesEficiencia = {
+            0: ['¡Ánimo! 🚀 Recién estás comenzando...', '#ff0000'],
+            10: ['¡Vas mejorando! 💪', '#ff4000'],
+            20: ['¡Buen progreso! ✨', '#ff8000'],
+            30: ['¡Sigue así! 🌟', '#ffbf00'],
+            40: ['¡Mitad del camino! 🏁', '#ffff00'],
+            50: ['¡Más de la mitad! 🎯', '#bfff00'],
+            60: ['¡Excelente rendimiento! 👍', '#80ff00'],
+            70: ['¡Casi lo logras! 💯', '#40ff00'],
+            80: ['¡Fantástico! 🌈', '#00ff00'],
+            90: ['¡Casi perfecto! 🏆', '#00bf40'],
+            100: ['¡PERFECTO! 🌟✨', '#008040']
+        };
 
-            for (let i = 1; i <= z; i++) {
-                const plantilla = document.createElement('div');
-                plantilla.className = 'plantilla';
-                plantilla.innerHTML = `
-                    <h3>Operacion ${i}</h3>
-                    <label for="prendasPorHora${i}">Prendas que pide por hora :</label>
-                    <input type="number" id="prendasPorHora${i}" required><br>
-                    <label for="prendasProducidas${i}">Prendas producidas al día :</label>
-                    <input type="number" id="prendasProducidas${i}" required><br>
+        function generarHoras() {
+            const horas = Array.from({length: 12}, (_, i) => (i + 1).toString().padStart(2, '0'));
+            const minutos = Array.from({length: 60}, (_, i) => i.toString().padStart(2, '0'));
+            
+            const llenarSelect = (id, valores) => {
+                const select = document.getElementById(id);
+                select.innerHTML = valores.map(v => `<option>${v}</option>`).join('');
+            };
+            
+            llenarSelect('horaIngreso', horas);
+            llenarSelect('horaSalida', horas);
+            llenarSelect('minutoIngreso', minutos);
+            llenarSelect('minutoSalida', minutos);
+        }
+
+        function convertirHora24(hora, periodo) {
+            let horas = parseInt(hora);
+            if (periodo === 'PM' && horas !== 12) horas += 12;
+            if (periodo === 'AM' && horas === 12) horas = 0;
+            return horas;
+        }
+
+        function calcularTiempo() {
+            const ingresoHoras = convertirHora24(
+                document.getElementById('horaIngreso').value,
+                document.getElementById('periodoIngreso').value
+            );
+            const ingresoMinutos = parseInt(document.getElementById('minutoIngreso').value);
+            
+            const salidaHoras = convertirHora24(
+                document.getElementById('horaSalida').value,
+                document.getElementById('periodoSalida').value
+            );
+            const salidaMinutos = parseInt(document.getElementById('minutoSalida').value);
+            
+            const totalMinutos = (salidaHoras * 60 + salidaMinutos) - (ingresoHoras * 60 + ingresoMinutos) - 45;
+            return Math.max(totalMinutos, 0);
+        }
+
+        function generarCamposOperaciones() {
+            const num = parseInt(document.getElementById('numOperaciones').value);
+            let html = '';
+            
+            for (let i = 1; i <= num; i++) {
+                html += `
+                    <div class="operacion">
+                        <h3>Operación ${i}</h3>
+                        <div class="input-group">
+                            <label>Prendas/hora:</label>
+                            <input type="number" class="prendasHora" step="0.01">
+                        </div>
+                        <div class="input-group">
+                            <label>Prendas producidas:</label>
+                            <input type="number" class="prendasProducidas" step="0.01">
+                        </div>
+                    </div>
                 `;
-                container.appendChild(plantilla);
             }
-
-            const button = document.createElement('button');
-            button.innerText = 'Calcular Resultados';
-            button.onclick = calcularResultados;
-            container.appendChild(button);
+            
+            document.getElementById('operacionesContainer').innerHTML = html;
         }
 
-        function calcularResultados() {
-            const z = parseInt(document.getElementById('operaciones').value);
-            const horaIngreso = document.getElementById('horaIngreso').value;
-            const horaSalida = document.getElementById('horaSalida').value;
-
-            // Convertir horas a minutos
-            const [horaI, minutoI] = horaIngreso.split(':').map(Number);
-            const [horaS, minutoS] = horaSalida.split(':').map(Number);
-            const totalMinutos = (horaS * 60 + minutoS) - (horaI * 60 + minutoI) - 45; // Restar 45 minutos por almuerzo
-
-            const porcentajes = [];
+        function calcularEficiencia() {
+            const tiempo = calcularTiempo();
+            if (tiempo <= 0) {
+                alert('Horario inválido o tiempo insuficiente');
+                return;
+            }
+            
+            const operaciones = Array.from(document.getElementsByClassName('operacion'));
             let totalPorcentaje = 0;
+            let resultados = [];
+            
+            operaciones.forEach((operacion, index) => {
+                const prendasHora = parseFloat(operacion.querySelector('.prendasHora').value) || 0;
+                const prendasProducidas = parseFloat(operacion.querySelector('.prendasProducidas').value) || 0;
+                
+                const requerido = tiempo * (prendasHora / 60);
+                const porcentaje = requerido > 0 ? (prendasProducidas / requerido) * 100 : 0;
+                totalPorcentaje += porcentaje;
+                resultados.push({index: index + 1, porcentaje});
+            });
+            
+            mostrarResultadosEficiencia(resultados, totalPorcentaje);
+        }
 
-            for (let i = 1; i <= z; i++) {
-                const a = parseFloat(document.getElementById(`prendasPorHora${i}`).value);
-                const b = parseFloat(document.getElementById(`prendasProducidas${i}`).value);
-
-                const c = totalMinutos * (a / 60); // Prendas requeridas
-                const d = b / c; // Porcentaje de producción
-
-                porcentajes.push(d);
-                totalPorcentaje += d; // Sumar porcentajes
-                document.getElementById('resultado').innerHTML += `Operación ${i}: ${Math.floor(d * 100)}%<br>`; // Mostrar como entero
+        function mostrarResultadosEficiencia(resultados, total) {
+            const esMultiple = resultados.length > 1;
+            const porcentajeTotal = esMultiple ? total : resultados[0].porcentaje;
+            const rango = Math.min(Math.floor(porcentajeTotal / 10) * 10, 100);
+            
+            let html = `<div class="resultado">
+                <h3>${mensajesEficiencia[rango][0]}</h3>
+                <p>Porcentaje Total: ${porcentajeTotal.toFixed(2)}%</p>`;
+            
+            if (esMultiple) {
+                html += resultados.map(r => `
+                    <p>Operación ${r.index}: ${r.porcentaje.toFixed(2)}%</p>
+                `).join('');
             }
+            
+            html += `<img src="sticker_${porcentajeTotal >= 100 ? 100 : rango}.gif" class="sticker"></div>`;
+            document.getElementById('resultadoEficiencia').innerHTML = html;
+        }
 
-            // Mostrar la suma de los porcentajes como entero
-            document.getElementById('resultado').innerHTML += `<strong>este eficiencia de : ${Math.floor(totalPorcentaje * 100)}%</strong><br> debe de ser igual al de tu hoja de eficiencia y si no lo es puede hacer un reclamo`;
+        function calcularCTS() {
+            const meses = parseInt(document.getElementById('mesesCTS').value);
+            const sueldo = parseFloat(document.getElementById('sueldoCTS').value);
+            const horasExtras = parseFloat(document.getElementById('horasExtrasCTS').value) * meses;
+            const bonos = parseFloat(document.getElementById('bonosCTS').value) * meses;
+            const tardanzas = parseInt(document.getElementById('tardanzasCTS').value);
+            const faltas = parseInt(document.getElementById('faltasCTS').value);
+            
+            const remuneracionComputable = sueldo + (bonos / 6) + (horasExtras / 6);
+            const descuentos = (tardanzas / 60) * (sueldo / 30 / 8) + (faltas * (sueldo / 30));
+            const cts = (remuneracionComputable / 12 * meses) - descuentos;
+            
+            document.getElementById('resultadoCTS').innerHTML = `
+                <div class="resultado">
+                    <h3>CTS Calculada: S/${cts.toFixed(2)}</h3>
+                    <p>Remuneración computable: S/${remuneracionComputable.toFixed(2)}</p>
+                    <p>Descuentos aplicados: S/${descuentos.toFixed(2)}</p>
+                </div>
+            `;
+        }
 
-            const mensaje = document.getElementById('mensaje');
-            if (totalPorcentaje < 0.5) {
-                mensaje.innerText = "¡Ánimo! 🌟 Puedes hacerlo, sigue esforzándote.";
-            } else if (totalPorcentaje >= 0.5 && totalPorcentaje < 1) {
-                mensaje.innerText = "¡Buen trabajo! 👍 Pero aún hay margen para mejorar.";
-            } else {
-                mensaje.innerText = "¡Felicidades! 🎉 Has superado las expectativas con un gran esfuerzo.";
+        function calcularGratificacion() {
+            const meses = parseInt(document.getElementById('mesesGrat').value);
+            const sueldo = parseFloat(document.getElementById('sueldoGrat').value);
+            const horasExtras = parseFloat(document.getElementById('horasExtrasGrat').value) * meses;
+            const bonos = parseFloat(document.getElementById('bonosGrat').value) * meses;
+            const faltas = parseInt(document.getElementById('faltasGrat').value);
+            
+            const remuneracionComputable = sueldo + (bonos / 6) + (horasExtras / 6);
+            const descuentos = faltas * (sueldo / 30);
+            const gratificacion = (remuneracionComputable * (meses / 6)) - descuentos;
+            
+            document.getElementById('resultadoGrat').innerHTML = `
+                <div class="resultado">
+                    <h3>Gratificación Calculada: S/${gratificacion.toFixed(2)}</h3>
+                    <p>Remuneración computable: S/${remuneracionComputable.toFixed(2)}</p>
+                    <p>Descuentos aplicados: S/${descuentos.toFixed(2)}</p>
+                </div>
+            `;
+        }
+
+        function showTab(tabName) {
+            document.querySelectorAll('.tab-content').forEach(tab => tab.classList.remove('active'));
+            document.querySelectorAll('.tabs button').forEach(btn => btn.classList.remove('active'));
+            document.getElementById(tabName).classList.add('active');
+            event.currentTarget.classList.add('active');
+        }
+
+        function cambiarTema(tema) {
+            const root = document.documentElement;
+            switch(tema) {
+                case 'claro':
+                    root.style.setProperty('--bg-color', '#f0f0f0');
+                    root.style.setProperty('--fg-color', '#333333');
+                    root.style.setProperty('--frame-bg', '#ffffff');
+                    root.style.setProperty('--entry-bg', 'white');
+                    break;
+                case 'oscuro':
+                    root.style.setProperty('--bg-color', '#2d2d2d');
+                    root.style.setProperty('--fg-color', '#ffffff');
+                    root.style.setProperty('--frame-bg', '#3d3d3d');
+                    root.style.setProperty('--entry-bg', '#4d4d4d');
+                    break;
+                default:
+                    root.style.setProperty('--bg-color', '#6a11cb');
+                    root.style.setProperty('--fg-color', '#ffffff');
+                    root.style.setProperty('--frame-bg', 'rgba(255, 255, 255, 0.2)');
+                    root.style.setProperty('--entry-bg', 'rgba(255, 255, 255, 0.9)');
             }
         }
+
+        // Inicialización
+        window.onload = () => {
+            generarHoras();
+            generarCamposOperaciones();
+        };
     </script>
 </body>
 </html>
